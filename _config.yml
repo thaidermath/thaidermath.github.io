@@ -4,3 +4,11 @@ plugins:
 
 title: [The title of your site]
 description: [A short description of your site's purpose]
+
+nav:
+  - name: Home
+    link: /
+  - name: Research
+    link: /research
+  - name: Teaching
+    link: /teaching
