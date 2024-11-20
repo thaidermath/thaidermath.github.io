@@ -30,6 +30,32 @@ main {
     margin: auto;
 }
 
+section {
+    margin: 2em 0;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f4f4f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+    color: #333;
+    border-bottom: 2px solid #555;
+    padding-bottom: 0.3em;
+}
+
+section p {
+    line-height: 1.8;
+}
+
+section img {
+    margin-top: 10px;
+    border: 3px solid #ddd;
+    border-radius: 10px;
+}
+
+
 footer {
     text-align: center;
     margin-top: 2em;
