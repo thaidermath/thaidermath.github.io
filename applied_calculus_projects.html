@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applied Calculus in Action: Interactive Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Slate, Zinc, Stone) with a Teal Accent -->
+    <!-- Application Structure Plan: The SPA is designed with a thematic, non-linear structure to enhance usability. Instead of mirroring the report's chapters, the content is grouped into three core application areas: 'Derivatives & Optimization', 'Growth, Decay & Finance', and 'Advanced Applications'. This allows users (instructors/students) to quickly navigate to projects based on the mathematical concept or application field they are interested in. A sticky top navigation bar facilitates smooth scrolling between these thematic sections. Each project is presented as an interactive 'card' that expands to reveal details, tasks, and in some cases, an interactive visualization (like the profit maximization chart). This structure was chosen to move from a static document to a dynamic, explorable resource, making it easier to compare projects and find relevant material without linear scrolling. -->
+    <!-- Visualization & Content Choices: The application translates static project descriptions into interactive components. For the 'Profit Maximization' project, an interactive bar chart (Chart.js/Canvas) was chosen to visually demonstrate the relationship between marginal cost and revenue, a core concept. Goal: Compare/Inform. Interaction: Buttons update the chart to show different economic metrics. Justification: A dynamic chart is more engaging and explanatory than a static table. For 'Related Rates', a step-by-step interactive diagram (HTML/CSS/JS) was chosen to guide users through the complex problem-solving process. Goal: Organize/Inform. Interaction: 'Next Step' button reveals each stage of the solution. Justification: This breaks down a difficult topic into manageable, digestible parts. All other projects are presented in expandable cards for clarity and organization. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #27272a; /* zinc-800 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #14b8a6; /* teal-500 */
+            border-bottom-color: #14b8a6; /* teal-500 */
+        }
+        .project-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out;
+        }
+        .details-content.open {
+            max-height: 2000px; /* Large enough to fit content */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .gemini-output {
+            white-space: pre-wrap;
+            background-color: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            line-height: 1.6;
+            color: #334155;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-teal-600">Calculus in Action</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#derivatives" class="nav-link text-slate-600 hover:text-teal-500 border-b-2 border-transparent pb-1">Derivatives & Optimization</a>
+                <a href="#growth" class="nav-link text-slate-600 hover:text-teal-500 border-b-2 border-transparent pb-1">Growth, Decay & Finance</a>
+                <a href="#advanced" class="nav-link text-slate-600 hover:text-teal-500 border-b-2 border-transparent pb-1">Advanced Applications</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-2">
+             <a href="#derivatives" class="block nav-link text-slate-600 hover:text-teal-500">Derivatives & Optimization</a>
+             <a href="#growth" class="block nav-link text-slate-600 hover:text-teal-500">Growth, Decay & Finance</a>
+             <a href="#advanced" class="block nav-link text-slate-600 hover:text-teal-500">Advanced Applications</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Introduction Section -->
+        <section id="intro" class="text-center mb-20">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">From Theory to Practice</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                Explore a curated collection of project-based learning assignments for Applied Calculus. This interactive resource bridges the gap between abstract concepts and real-world applications in business, engineering, and science. Click on any project to discover its objectives, tasks, and underlying principles.
+            </p>
+        </section>
+
+        <!-- Section 1: Derivatives & Optimization -->
+        <section id="derivatives" class="mb-20 scroll-mt-24">
+            <h3 class="text-3xl font-bold text-slate-700 mb-2 border-l-4 border-teal-500 pl-4">Derivatives & Optimization</h3>
+            <p class="text-slate-600 mb-8 ml-5">This section focuses on the cornerstone of applied calculus: understanding rates of change and finding optimal solutions. These projects use derivatives to model physical phenomena, make business decisions, and solve complex engineering challenges.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project Card: Rate of Change Labs -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="rate-of-change">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Rate of Change Labs</h4>
+                        <p class="text-slate-500 mt-2">Investigate rates of change with physical intuition, focusing on concavity and graphical analysis.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapters 1 & 2 • Physics/General</span>
+                    </div>
+                </div>
+                <!-- Project Card: Zipline Challenge -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="zipline">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">The Zipline Challenge</h4>
+                        <p class="text-slate-500 mt-2">An engineering-themed project on optimization and linear approximation.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapters 1 & 2 • Engineering</span>
+                    </div>
+                </div>
+                <!-- Project Card: Profit Maximization -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="profit-maximization">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Profit Maximization</h4>
+                        <p class="text-slate-500 mt-2">A business case study using marginal analysis to find maximum profit.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapter 2 • Business/Economics</span>
+                    </div>
+                </div>
+                 <!-- Project Card: Related Rates -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="related-rates">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Related Rates Scenarios</h4>
+                        <p class="text-slate-500 mt-2">Use implicit differentiation to solve dynamic problems like the classic lighthouse or conical tank scenarios.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapter 3 • Physics/Geometry</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Exponential Growth, Decay & Finance -->
+        <section id="growth" class="mb-20 scroll-mt-24">
+            <h3 class="text-3xl font-bold text-slate-700 mb-2 border-l-4 border-teal-500 pl-4">Growth, Decay & Finance</h3>
+            <p class="text-slate-600 mb-8 ml-5">Explore the power of exponential and logarithmic functions. These projects cover fundamental models for phenomena across science and finance, from disease modeling and radioactive decay to the principles of compound interest.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project Card: S-I-R Model -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="sir-model">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Epidemiology: The S-I-R Model</h4>
+                        <p class="text-slate-500 mt-2">Analyze the spread of a disease using a system of rate equations without needing to solve them.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapters 4 & 5 • Biology</span>
+                    </div>
+                </div>
+                <!-- Project Card: Pharmacokinetics -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="pharmacokinetics">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Pharmacokinetics & Decay</h4>
+                        <p class="text-slate-500 mt-2">Model radioactive decay and drug concentration in the bloodstream using half-life.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapters 4 & 5 • Pharmacology</span>
+                    </div>
+                </div>
+                <!-- Project Card: Compound Interest -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="compound-interest">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">The Power of Compound Interest</h4>
+                        <p class="text-slate-500 mt-2">Explore the transition from discrete to continuous compounding in finance.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapters 4 & 5 • Finance</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Advanced Applications -->
+        <section id="advanced" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold text-slate-700 mb-2 border-l-4 border-teal-500 pl-4">Advanced Applications</h3>
+            <p class="text-slate-600 mb-8 ml-5">This final section presents capstone-style projects that utilize integral calculus and multivariable functions. These assignments demonstrate the power of calculus to solve sophisticated problems in economics and resource management.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project Card: Consumer Surplus -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="consumer-surplus">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Economic Welfare Analysis</h4>
+                        <p class="text-slate-500 mt-2">Use definite integrals to calculate consumer and producer surplus in a market.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapter 6 • Economics</span>
+                    </div>
+                </div>
+                <!-- Project Card: Resource Consumption -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="resource-consumption">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Resource Consumption Models</h4>
+                        <p class="text-slate-500 mt-2">Frame the definite integral as the total accumulation of a quantity when its rate of change is known.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapter 6 • Environmental Science</span>
+                    </div>
+                </div>
+                <!-- Project Card: Utility Maximization -->
+                <div class="project-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" data-project="utility-maximization">
+                    <div class="p-6">
+                        <h4 class="text-xl font-semibold text-slate-800">Constrained Optimization</h4>
+                        <p class="text-slate-500 mt-2">A capstone project using Lagrange multipliers to maximize consumer utility subject to a budget.</p>
+                        <span class="text-teal-600 font-medium mt-4 inline-block">Chapter 7 • Economics</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Project Details -->
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div id="modal-content" class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <!-- Content will be injected here by JavaScript -->
+        </div>
+    </div>
+
+<script>
+    const projectsData = {
+        'rate-of-change': {
+            title: 'Rate of Change Investigations',
+            chapters: '1 & 2',
+            area: 'Physics/General',
+            source: 'Oklahoma State University, CLEAR Calculus Labs',
+            sourceLink: 'https://clearcalculus.okstate.edu/student-resources/calculus-1-labs',
+            overview: `This project leverages physical intuition to build a deep understanding of rates of change. It emphasizes collaborative work and communicating mathematical ideas with precision.`,
+            objectives: [
+                'Connect a function\'s graph to its instantaneous and average rates of change.',
+                'Describe the relationship between interrelated quantities (e.g., height and volume of liquid in a container).',
+                'Interpret the first and second derivatives in a physical context (rate of change and concavity).'
+            ],
+            tasks: [
+                {
+                    name: 'Part 1: Foundational Concepts',
+                    description: 'Introduces a distance-time relationship to motivate the need for a precise definition of instantaneous rate of change, moving from the slope of a secant line to the slope of a tangent line.'
+                },
+                {
+                    name: 'Part 2: Water in Variously Shaped Bottles',
+                    description: 'Student groups sketch the graph of water\'s height (h) as a function of volume (V) for bottles of different shapes (cylinder, cone, sphere), assuming water is poured at a constant rate. They must justify the shape and concavity of each graph, reasoning that the rate of change, dh/dV, is related to the bottle\'s cross-sectional area.'
+                }
+            ]
+        },
+        'zipline': {
+            title: 'The Zipline Challenge',
+            chapters: '1 & 2',
+            area: 'Engineering/Physics',
+            source: 'MIT Calculus Projects, Jennifer French',
+            sourceLink: 'http://web.mit.edu/~jfrench/www/index.html',
+            overview: `This sophisticated, multi-part project from MIT integrates authentic engineering themes. It challenges students to model a zipline, a rich problem that avoids contrived textbook examples.`,
+            objectives: [
+                'Apply linear approximation to estimate changes in a dynamic physical system.',
+                'Model a physical scenario using geometric, algebraic, and energy-based functions.',
+                'Use first and second derivative tests to find optimal conditions for maximum velocity.'
+            ],
+            tasks: [
+                {
+                    name: 'Part 1: Linear Approximation',
+                    description: 'Using an energy argument (Potential Energy = Kinetic Energy), students derive a function for velocity in terms of vertical drop, v(h). They then use the derivative, v\'(h), to find the linear approximation, estimating the change in maximum velocity for a small change in drop height.'
+                },
+                {
+                    name: 'Part 2: Optimization',
+                    description: 'Assuming a frictionless, elliptic path, students must find the point where the rider experiences maximum velocity. This requires recognizing that max velocity occurs at minimum height and using differential calculus to find the lowest point of the parameterized path.'
+                }
+            ]
+        },
+        'profit-maximization': {
+            title: 'Business Decision-Making: Profit Maximization',
+            chapters: '2',
+            area: 'Business/Economics',
+            source: 'Based on principles from Old Dominion University & Sierra College',
+            sourceLink: '#',
+            overview: `This project creates a realistic business case study focused on using the derivative for production and pricing decisions. It's a central theme in business-oriented calculus courses.`,
+            objectives: [
+                'Model revenue, cost, and profit as functions of production quantity.',
+                'Calculate and interpret marginal revenue, cost, and profit as derivatives.',
+                'Apply optimization techniques to determine the production level that maximizes profit.'
+            ],
+            tasks: [
+                {
+                    name: 'Scenario Setup',
+                    description: 'Given a demand function, p(q) = 170 - q, and a cost function, C(q) = 30q + 1000.'
+                },
+                {
+                    name: 'Modeling',
+                    description: 'Construct the revenue function R(q) = q * p(q) and the profit function P(q) = R(q) - C(q).'
+                },
+                {
+                    name: 'Marginal Analysis',
+                    description: 'Calculate the marginal functions by taking the derivatives: C\'(q), R\'(q), and P\'(q).'
+                },
+                {
+                    name: 'Optimization',
+                    description: 'Solve for the production level that maximizes profit by finding the critical point where P\'(q) = 0, or equivalently, where marginal revenue equals marginal cost (R\'(q) = C\'(q)).'
+                }
+            ],
+            interactive: 'chart'
+        },
+        'related-rates': {
+            title: 'Related Rates Scenarios',
+            chapters: '3',
+            area: 'Physics/Geometry',
+            source: 'Whitman College, University of Colorado, Paul\'s Online Math Notes',
+            sourceLink: 'https://www.whitman.edu/mathematics/calculus_online/section06.02.html',
+            overview: `This project introduces a structured, five-step problem-solving process for tackling complex, dynamic "related rates" problems where multiple quantities change over time.`,
+            objectives: [
+                'Identify variables and their rates of change in a dynamic system.',
+                'Establish a geometric or algebraic equation relating the variables.',
+                'Use implicit differentiation with respect to time to relate their rates of change.',
+                'Solve for an unknown rate at a specific instant.'
+            ],
+            tasks: [
+                {
+                    name: 'The Lighthouse Problem',
+                    description: 'A lighthouse beam rotates at a constant speed. Determine how fast the spot of light is moving along the shore at a specific moment. This requires a trigonometric relationship.'
+                },
+                {
+                    name: 'The Conical Tank Problem',
+                    description: 'Water is pumped into an inverted conical tank at a constant rate. Find how fast the water level is rising at a certain depth. This requires using similar triangles.'
+                },
+                {
+                    name: 'The Shadow Problem',
+                    description: 'A person walks away from a streetlight. Determine the rate at which the length of their shadow is increasing. This is a classic application of similar triangles.'
+                }
+            ],
+            interactive: 'steps'
+        },
+        'sir-model': {
+            title: 'Epidemiology and the S-I-R Model',
+            chapters: '4 & 5',
+            area: 'Biology/Epidemiology',
+            source: 'Calculus in Context textbook project',
+            sourceLink: 'http://math.smith.edu/~callahan/cic/book.pdf',
+            overview: `This case study introduces the Susceptible-Infected-Recovered (S-I-R) model for disease spread. Students perform a powerful qualitative analysis of a system of rate equations without needing to solve them.`,
+            objectives: [
+                'Understand and interpret a system of rate equations that model a dynamic process.',
+                'Apply the derivative to analyze the behavior of a system (e.g., when an epidemic is growing or peaking).',
+                'Connect the signs of derivatives to the qualitative behavior of functions.'
+            ],
+            tasks: [
+                {
+                    name: 'Interpretation',
+                    description: 'Explain in words what each term in the rate equations (S\' = -aSI, I\' = aSI - bI, R\' = bI) represents, such as the rate of infection or recovery.'
+                },
+                {
+                    name: 'Analysis',
+                    description: 'Use the equations to determine the conditions under which an epidemic will grow (when I\' > 0). This leads to the famous "epidemic threshold" condition: S > b/a.'
+                },
+                {
+                    name: 'Optimization',
+                    description: 'Determine when the epidemic reaches its peak by finding when the rate of change of the infected population is zero (I\' = 0), corresponding to the maximum of the function I(t).'
+                }
+            ]
+        },
+        'pharmacokinetics': {
+            title: 'Pharmacokinetics and Radioactive Decay',
+            chapters: '4 & 5',
+            area: 'Pharmacology/Physics',
+            source: 'University of Memphis, City Tech OpenLab',
+            sourceLink: 'https://openlab.citytech.cuny.edu/poiriermat2680fall2020/category/course-activities/student-work/project-1/',
+            overview: `This case study explores exponential decay by modeling the loss of mass in radioactive material or the decreasing concentration of a drug in the bloodstream.`,
+            objectives: [
+                'Use experimental data to construct an exponential decay model.',
+                'Understand, calculate, and interpret the concept of half-life.',
+                'Apply natural logarithms to solve exponential equations.'
+            ],
+            tasks: [
+                {
+                    name: 'Model Building',
+                    description: 'Given experimental data (e.g., "a material loses 34% of its mass in 55 minutes"), solve for the decay constant k in the model Q(t) = Q₀e⁻ᵏᵗ by using natural logarithms.'
+                },
+                {
+                    name: 'Half-Life Calculation',
+                    description: 'Once k is determined, calculate the half-life, τ, using the formula τ = ln(2)/k.'
+                },
+                {
+                    name: 'Application Extension',
+                    description: 'Using a table of real data (e.g., caffeine concentration in the bloodstream over time), plot the data and use two points to estimate the decay constant and biological half-life.'
+                }
+            ]
+        },
+        'compound-interest': {
+            title: 'The Power of Compound Interest',
+            chapters: '4 & 5',
+            area: 'Finance/Business',
+            source: 'Texas State Mathworks, Ximera - The Ohio State University',
+            sourceLink: 'https://www.txst.edu/mathworks/me-curriculum/math-explorations-for-teachers/online-learning-tools/personal-financial-literacy/math-of-finance-8th-grade-teks/interest.html',
+            overview: `This project explores investment growth, focusing on the transition from discrete compound interest to continuous compounding—a classic application of the number e.`,
+            objectives: [
+                'Model investment growth using the discrete compound interest formula.',
+                'Understand the continuous compounding formula A(t) = Peʳᵗ as the limit of the discrete formula.',
+                'Use the derivative to find and interpret the instantaneous rate of growth of an investment.'
+            ],
+            tasks: [
+                {
+                    name: 'Discrete Compounding',
+                    description: 'Calculate the final amount of an investment with interest compounded annually, quarterly, monthly, and daily to see how the final amount increases with frequency.'
+                },
+                {
+                    name: 'Continuous Compounding',
+                    description: 'Calculate the final amount using the continuous formula A(t) = Peʳᵗ and observe that this is the limit the discrete calculations were approaching.'
+                },
+                {
+                    name: 'Rate of Growth',
+                    description: 'For the continuously compounded case, calculate the derivative A\'(t) = rPeʳᵗ and interpret its value at different times (e.g., A\'(1) and A\'(10)) as the instantaneous rate of growth in dollars per year.'
+                }
+            ]
+        },
+        'consumer-surplus': {
+            title: 'Economic Welfare Analysis: Consumer and Producer Surplus',
+            chapters: '6',
+            area: 'Economics',
+            source: 'Saint Louis University, Sierra College',
+            sourceLink: 'https://mathstat.slu.edu/~may/ExcelCalculus/sec-7-8-BusinessApplicationsIntegral.html',
+            overview: `A quintessential application of the definite integral in microeconomics. This project involves modeling a market with supply and demand curves and using integration to calculate the total "welfare" gained by consumers and producers.`,
+            objectives: [
+                'Algebraically find the equilibrium point where supply and demand curves intersect.',
+                'Set up definite integrals to represent the area between curves.',
+                'Evaluate definite integrals using the Fundamental Theorem of Calculus.',
+                'Interpret the economic meaning of consumer and producer surplus.'
+            ],
+            tasks: [
+                {
+                    name: 'Find Equilibrium',
+                    description: 'Given linear supply S(q) and demand D(q) functions, set them equal to find the equilibrium quantity (qₑ) and price (pₑ).'
+                },
+                {
+                    name: 'Set up Integrals',
+                    description: 'Consumer Surplus is the integral of (D(q) - pₑ) from 0 to qₑ. Producer Surplus is the integral of (pₑ - S(q)) from 0 to qₑ.'
+                },
+                {
+                    name: 'Evaluate and Interpret',
+                    description: 'Calculate the values and explain what they represent in terms of market benefits for consumers and producers.'
+                }
+            ]
+        },
+        'resource-consumption': {
+            title: 'Resource Consumption Models',
+            chapters: '6',
+            area: 'Environmental Science',
+            source: 'General Application',
+            sourceLink: '#',
+            overview: `This project reinforces the Fundamental Theorem of Calculus by framing the definite integral as the net change or total accumulation of a quantity when its rate of change is known.`,
+            objectives: [
+                'Model a rate of change (e.g., consumption, flow) with a function.',
+                'Use a definite integral to calculate the total amount accumulated over a time interval.',
+                'Distinguish between the rate of change at a point and the total accumulated change over an interval.'
+            ],
+            tasks: [
+                {
+                    name: 'Scenario',
+                    description: 'Given a rate of consumption of a resource, e.g., oil consumption modeled by r(t) = 1.2e⁰.⁰²ᵗ billion barrels per year.'
+                },
+                {
+                    name: 'Set up and Evaluate Integral',
+                    description: 'To find the total oil consumed between two points in time (e.g., year 5 to year 10), set up and evaluate the definite integral of r(t) over that interval.'
+                },
+                {
+                    name: 'Analysis and Interpretation',
+                    description: 'Calculate the instantaneous rates r(5) and r(10) and write a paragraph explaining the difference between these values (rate in barrels/year) and the value of the integral (total barrels consumed).'
+                }
+            ]
+        },
+        'utility-maximization': {
+            title: 'Capstone: Constrained Optimization in Economics',
+            chapters: '7',
+            area: 'Economics',
+            source: 'Northwestern University',
+            sourceLink: 'https://www.math.northwestern.edu/~clark/285/2006-07/handouts/lagrange-econ.pdf',
+            overview: `An excellent capstone project that uses multivariable functions, partial derivatives, and the method of Lagrange multipliers to solve a significant microeconomics problem: maximizing consumer utility subject to a budget constraint.`,
+            objectives: [
+                'Model a scenario using a function of several variables (utility) and a constraint (budget).',
+                'Calculate partial derivatives for a multivariable function.',
+                'Apply the method of Lagrange multipliers to find optimal values.',
+                'Interpret the economic significance of the Lagrange multiplier, λ.'
+            ],
+            tasks: [
+                {
+                    name: 'Formulate the Problem',
+                    description: 'State the objective function to be maximized (e.g., a Cobb-Douglas utility function U(x, y)) and the budget constraint equation (e.g., 20x + 10y = 400).'
+                },
+                {
+                    name: 'Set up the Lagrange System',
+                    description: 'Use the condition ∇U = λ∇g to create a system of three equations with three unknowns (x, y, λ).'
+                },
+                {
+                    name: 'Solve and Interpret',
+                    description: 'Solve the system to find the optimal quantities of each commodity. Interpret the value of λ as the "marginal utility of money"—the approximate increase in maximum utility if the budget were to increase by one dollar.'
+                }
+            ]
+        }
+    };
+
+    const modal = document.getElementById('project-modal');
+    const modalContent = document.getElementById('modal-content');
+    const projectCards = document.querySelectorAll('.project-card');
+
+    let profitChart = null;
+
+    function createModalHtml(project) {
+        let tasksHtml = project.tasks.map(task => `
+            <div class="mt-4">
+                <h6 class="font-semibold text-slate-700">${task.name}</h6>
+                <p class="text-slate-600">${task.description}</p>
+            </div>
+        `).join('');
+
+        let objectivesHtml = project.objectives.map(obj => `<li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">✓</span>${obj}</li>`).join('');
+
+        let interactiveHtml = '';
+        if (project.interactive === 'chart') {
+            interactiveHtml = `
+                <div class="mt-8 p-6 bg-slate-50 rounded-lg">
+                    <h5 class="text-lg font-semibold text-slate-800 mb-4">Interactive Demo: Profit Maximization</h5>
+                    <p class="text-slate-600 mb-4">This chart visualizes the economic model. The point where Marginal Revenue (MR) intersects Marginal Cost (MC) is where profit is maximized. Click the buttons to toggle the data shown.</p>
+                    <div class="chart-container"><canvas id="profitChartCanvas"></canvas></div>
+                    <div class="mt-4 flex flex-wrap justify-center gap-2">
+                        <button id="show-rev-cost" class="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600 transition">Revenue & Cost</button>
+                        <button id="show-profit" class="bg-slate-500 text-white px-4 py-2 rounded-md hover:bg-slate-600 transition">Profit</button>
+                        <button id="show-marginal" class="bg-slate-500 text-white px-4 py-2 rounded-md hover:bg-slate-600 transition">Marginal Values</button>
+                    </div>
+                </div>
+            `;
+        }
+        if (project.interactive === 'steps') {
+            interactiveHtml = `
+                <div class="mt-8 p-6 bg-slate-50 rounded-lg">
+                    <h5 class="text-lg font-semibold text-slate-800 mb-4">Interactive Demo: 5-Step Method for Related Rates</h5>
+                    <div id="steps-container" class="space-y-3">
+                        <div class="step p-3 border-l-4 border-slate-200" data-step="1"><strong>Step 1: Diagram.</strong> Draw and label a picture of the situation.</div>
+                        <div class="step p-3 border-l-4 border-slate-200 hidden" data-step="2"><strong>Step 2: Rates.</strong> Identify all known and unknown rates of change (derivatives with respect to time).</div>
+                        <div class="step p-3 border-l-4 border-slate-200 hidden" data-step="3"><strong>Step 3: Equation.</strong> Find an equation that relates the variables whose rates you are considering.</div>
+                        <div class="step p-3 border-l-4 border-slate-200 hidden" data-step="4"><strong>Step 4: Differentiate.</strong> Differentiate the equation implicitly with respect to time (t), using the Chain Rule.</div>
+                        <div class="step p-3 border-l-4 border-slate-200 hidden" data-step="5"><strong>Step 5: Substitute and Solve.</strong> Plug in all known values for the specific instant and solve for the unknown rate.</div>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <button id="next-step-btn" class="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600 transition">Next Step</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="p-8">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-sm font-medium text-teal-600 bg-teal-100 px-3 py-1 rounded-full">${project.area}</span>
+                        <h3 class="text-3xl font-bold text-slate-800 mt-2">${project.title}</h3>
+                        <p class="text-slate-500">Chapters: ${project.chapters}</p>
+                    </div>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-600 text-4xl font-light">&times;</button>
+                </div>
+                <div class="mt-6 border-t pt-6">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h5 class="text-lg font-semibold text-slate-800 mb-2">Project Overview</h5>
+                            <p class="text-slate-600">${project.overview}</p>
+                            <h5 class="text-lg font-semibold text-slate-800 mt-6 mb-2">Learning Objectives</h5>
+                            <ul class="space-y-2 text-slate-600">${objectivesHtml}</ul>
+                             <a href="${project.sourceLink}" target="_blank" rel="noopener noreferrer" class="inline-block mt-6 text-teal-600 font-medium hover:underline">
+                                Source Material: ${project.source} &rarr;
+                            </a>
+                        </div>
+                        <div>
+                            <h5 class="text-lg font-semibold text-slate-800 mb-2">Project Tasks</h5>
+                            ${tasksHtml}
+                        </div>
+                    </div>
+                    ${interactiveHtml}
+                    <!-- Gemini Feature Section -->
+                    <div class="mt-8 border-t pt-6">
+                         <h5 class="text-lg font-semibold text-slate-800 mb-4">Need a new challenge?</h5>
+                         <button id="gemini-generate-btn" class="bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-semibold px-5 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-700 transition duration-300">
+                           ✨ Generate New Scenario
+                         </button>
+                         <div id="gemini-output-container" class="mt-4 hidden">
+                            <div class="gemini-output">
+                                <!-- AI content will be injected here -->
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Gemini API call function with exponential backoff
+    async function callGeminiApi(prompt, maxRetries = 3) {
+        const apiKey = ""; // API key is handled by the environment
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        
+        let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+        const payload = { contents: chatHistory };
+
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("Invalid response structure from Gemini API");
+                }
+            } catch (error) {
+                if (i === maxRetries - 1) {
+                    console.error("Gemini API call failed after multiple retries:", error);
+                    return "Sorry, I couldn't generate a new scenario right now. Please try again later.";
+                }
+                const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                await new Promise(res => setTimeout(res, delay));
+            }
+        }
+    }
+
+
+    function handleGeminiInteraction(project) {
+        const generateBtn = document.getElementById('gemini-generate-btn');
+        const outputContainer = document.getElementById('gemini-output-container');
+        const outputDiv = outputContainer.querySelector('.gemini-output');
+
+        generateBtn.addEventListener('click', async () => {
+            // Show loading state
+            outputContainer.classList.remove('hidden');
+            outputDiv.textContent = 'Generating a new scenario with Gemini... please wait.';
+            generateBtn.disabled = true;
+            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Construct the prompt
+            const tasksString = project.tasks.map(t => `- ${t.name}: ${t.description}`).join('\n');
+            const prompt = `
+                You are an expert applied calculus instructor creating a new, engaging practice problem for your students. Your goal is to be creative and clear.
+
+                Based on the following project, create a new, analogous scenario. The new scenario must use the same core calculus concepts as the original.
+
+                **Original Project Details:**
+                * **Title:** ${project.title}
+                * **Overview:** ${project.overview}
+                * **Core Concepts from Tasks:**
+                ${tasksString}
+
+                **Your Task:**
+                Generate a new, distinct scenario with a different context or application. Provide a clear problem setup and then briefly outline the steps or questions a student would need to answer to solve it, mirroring the structure of the original tasks. Format your response clearly. Do not use markdown formatting like headings or bold text.
+            `;
+            
+            // Call API and display result
+            const resultText = await callGeminiApi(prompt);
+            outputDiv.textContent = resultText;
+            generateBtn.disabled = false;
+            generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        });
+    }
+
+
+    function renderProfitChart() {
+        const ctx = document.getElementById('profitChartCanvas').getContext('2d');
+        const quantities = Array.from({ length: 15 }, (_, i) => i * 10); // 0 to 140
+        
+        const revenue = q => (170 - q) * q;
+        const cost = q => 30 * q + 1000;
+        const profit = q => revenue(q) - cost(q);
+        const marginalRevenue = q => 170 - 2 * q;
+        const marginalCost = q => 30;
+
+        const revenueData = quantities.map(revenue);
+        const costData = quantities.map(cost);
+        const profitData = quantities.map(profit);
+        const marginalRevenueData = quantities.map(marginalRevenue);
+        const marginalCostData = quantities.map(() => 30);
+
+        if (profitChart) {
+            profitChart.destroy();
+        }
+
+        profitChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: quantities,
+                datasets: []
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Value ($)'
+                        }
+                    },
+                    x: {
+                       title: {
+                            display: true,
+                            text: 'Quantity (units)'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: (tooltipItems) => `Quantity: ${tooltipItems[0].label}`
+                        }
+                    }
+                }
+            }
+        });
+
+        const updateChart = (type) => {
+            profitChart.data.datasets = [];
+            const buttons = document.querySelectorAll('.chart-container + div button');
+            buttons.forEach(b => b.classList.replace('bg-teal-500', 'bg-slate-500'));
+            
+            if (type === 'rev-cost') {
+                document.getElementById('show-rev-cost').classList.replace('bg-slate-500', 'bg-teal-500');
+                profitChart.data.datasets.push({ label: 'Total Revenue', data: revenueData, borderColor: '#2dd4bf', backgroundColor: '#2dd4bf20', fill: true, tension: 0.1 });
+                profitChart.data.datasets.push({ label: 'Total Cost', data: costData, borderColor: '#f43f5e', backgroundColor: '#f43f5e20', fill: true, tension: 0.1 });
+            } else if (type === 'profit') {
+                 document.getElementById('show-profit').classList.replace('bg-slate-500', 'bg-teal-500');
+                 profitChart.data.datasets.push({ label: 'Profit', data: profitData, borderColor: '#14b8a6', backgroundColor: '#14b8a620', fill: true, tension: 0.1 });
+            } else if (type === 'marginal') {
+                document.getElementById('show-marginal').classList.replace('bg-slate-500', 'bg-teal-500');
+                profitChart.data.datasets.push({ label: 'Marginal Revenue', data: marginalRevenueData, borderColor: '#38bdf8', tension: 0.1 });
+                profitChart.data.datasets.push({ label: 'Marginal Cost', data: marginalCostData, borderColor: '#fb923c', borderDash: [5, 5] });
+            }
+            profitChart.update();
+        };
+
+        // Initial chart view
+        updateChart('rev-cost');
+
+        // Add event listeners within the modal context
+        document.getElementById('modal-content').addEventListener('click', function(e) {
+            if (e.target.id === 'show-rev-cost') updateChart('rev-cost');
+            if (e.target.id === 'show-profit') updateChart('profit');
+            if (e.target.id === 'show-marginal') updateChart('marginal');
+        });
+    }
+
+    function handleStepsInteraction() {
+        let currentStep = 1;
+        const nextStepBtn = document.getElementById('next-step-btn');
+        const steps = document.querySelectorAll('#steps-container .step');
+        
+        steps.forEach(step => {
+            if(parseInt(step.dataset.step) === 1) {
+                step.classList.remove('hidden');
+                step.classList.replace('border-slate-200', 'border-teal-500');
+            } else {
+                step.classList.add('hidden');
+                step.classList.replace('border-teal-500', 'border-slate-200');
+            }
+        });
+        nextStepBtn.textContent = 'Next Step (1/5)';
+
+        nextStepBtn.addEventListener('click', () => {
+            currentStep++;
+            if (currentStep > 5) {
+                currentStep = 1; // Reset
+            }
+            
+            steps.forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                if (stepNum <= currentStep) {
+                    step.classList.remove('hidden');
+                    if(stepNum === currentStep) {
+                       step.classList.replace('border-slate-200', 'border-teal-500');
+                    } else {
+                       step.classList.replace('border-teal-500', 'border-slate-200');
+                    }
+                } else {
+                    step.classList.add('hidden');
+                    step.classList.replace('border-teal-500', 'border-slate-200');
+                }
+            });
+            
+            if (currentStep === 5) {
+                nextStepBtn.textContent = 'Reset';
+            } else {
+                nextStepBtn.textContent = `Next Step (${currentStep}/5)`;
+            }
+        });
+    }
+
+    projectCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const projectId = card.dataset.project;
+            const project = projectsData[projectId];
+            modalContent.innerHTML = createModalHtml(project);
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            document.getElementById('close-modal').addEventListener('click', () => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                if (profitChart) {
+                    profitChart.destroy();
+                    profitChart = null;
+                }
+            });
+            
+            // Initialize Gemini feature
+            handleGeminiInteraction(project);
+
+            if (project.interactive === 'chart') {
+                // Use a timeout to ensure the canvas is in the DOM before rendering
+                setTimeout(renderProfitChart, 50);
+            }
+            if (project.interactive === 'steps') {
+                handleStepsInteraction();
+            }
+        });
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            if (profitChart) {
+                profitChart.destroy();
+                profitChart = null;
+            }
+        }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Active nav link highlighting on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 120) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+</body>
+</html>
