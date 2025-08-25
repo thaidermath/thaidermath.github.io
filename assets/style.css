@@ -398,6 +398,22 @@ header, section, footer {
 header {
     padding-right: 320px;
 }
+
+/* New: make default layout full-width (no left sidebar). To enable the left sidebar (profile + small column),
+   add class="with-sidebar" to the <body> element (used on index.html). */
+body:not(.with-sidebar) .wrapper {
+    width: auto;
+    margin: 0;
+}
+body:not(.with-sidebar) header,
+body:not(.with-sidebar) footer {
+    display: none;
+}
+body:not(.with-sidebar) section {
+    width: auto;
+    float: none;
+    padding: 20px 30px 50px;
+}
 section {
     border: 1px solid #e5e5e5;
     border-width: 1px 0;
