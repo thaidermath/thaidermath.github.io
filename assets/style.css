@@ -314,6 +314,25 @@ header {
     position: fixed;
     -webkit-font-smoothing: subpixel-antialiased;
 }
+/* Some pages use a div with class "flex-header" instead of the <header> element.
+   Make .flex-header match the header layout so the logo (braid image) stays in the
+   left column and does not expand to the main content width. */
+.flex-header {
+    width: 270px;
+    float: left;
+    position: fixed;
+    -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Constrain logo images inside the fixed sidebar so they never overflow. */
+.flex-header .flex-logo img,
+.flex-logo img,
+header .flex-logo img {
+    max-width: 100%;
+    height: auto;
+    max-height: 360px; /* increased to ~4x the original 90px */
+    display: block;
+}
 ul.downloads {
     list-style: none;
     height: 40px;
