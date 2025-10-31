@@ -34,23 +34,31 @@
     </head>
     <body>
         <div class="wrapper">
-                          <div class="flex-header">
+            <header>
+                <div class="flex-header">
                     <div class="flex-title">
                         <h1 id="site_title"><a href="https://thaidermath.github.io/">Touseef Haider</a></h1>
-                        
                     </div>
                     <div class="flex-logo">
                         <img id="Braid image" src="assets/B5.png" alt="Braid image" />
                     </div>
                 </div>
+            </header>
             <section>
                 <div class="flex-container">
+                    <input id="toggle" type="checkbox" />
                     <div class="flex-item"><a href="index.html">About</a></div>
                     <div class="flex-item" id="active"><a href="research.html">Research</a></div>
                     <div class="flex-item"><a href="datascience.html">Data Science</a></div>
                     <div class="flex-item"><a href="teaching.html">Teaching</a></div>
                     <div class="flex-item"><a href="other.html">Other</a></div>
                     <div class="flex-item"><a href="contact.html">Contact</a></div>
+                    <div class="flex-item" id="hamburger">
+                        <label for="toggle">
+                            <i class="fas fa-bars" id="bars"></i>
+                            <i class="fas fa-times" id="times"></i>
+                        </label>
+                    </div>
                 </div>
 
                 <p><strong>An intro to my research:</strong></p>
