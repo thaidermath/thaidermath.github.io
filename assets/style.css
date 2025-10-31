@@ -333,6 +333,20 @@ header .flex-logo img {
     max-height: 360px; /* increased to ~4x the original 90px */
     display: block;
 }
+@media screen and (max-width: 960px) {
+    .flex-header .flex-logo img,
+    .flex-logo img,
+    header .flex-logo img {
+        max-height: 220px;
+    }
+}
+@media screen and (max-width: 600px) {
+    .flex-header .flex-logo img,
+    .flex-logo img,
+    header .flex-logo img {
+        max-height: 160px;
+    }
+}
 ul.downloads {
     list-style: none;
     height: 40px;
@@ -408,14 +422,15 @@ footer {
     div.wrapper {
     width: auto;
     margin: 0;
+    padding: 0 20px;
 }
-header, section, footer {
+header, .flex-header, section, footer {
     float: none;
     position: static;
     width: auto;
 }
-header {
-    padding-right: 320px;
+header, .flex-header {
+    padding: 0 0 20px;
 }
 
 /* New: make default layout full-width (no left sidebar). To enable the left sidebar (profile + small column),
@@ -451,7 +466,7 @@ header ul {
     body {
     word-wrap: break-word;
 }
-header {
+header, .flex-header {
     padding: 0;
 }
 header ul, header p.view {
@@ -601,12 +616,12 @@ div.wrapper {
     max-width: 661px;
     margin: 0 auto;
 }
-header, section, footer {
+header, .flex-header, section, footer {
     float: none;
     padding: 0;
     position: static;
 }
-header {
+header, .flex-header {
     margin-bottom: 20px;
     padding: 0;
 }
@@ -652,7 +667,7 @@ pre, code {
     body {
     padding: 15px;
 }
-header {
+header, .flex-header {
     margin-bottom: 8px;
 }
 header ul {
